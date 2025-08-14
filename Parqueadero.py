@@ -22,7 +22,8 @@ def placaExiste(placa):
                 return True
         return print("Error, Placa no existe")
 #funcion para ingreso de vehiculos
-def ingresoVehiculo(placa, tipo,horaIngreso):
+def ingresoVehiculo(placa, tipo):
+    horaIngreso = capturaHora()
     nuevoVehiculo = {}
     match tipo:
         case 1:
@@ -43,7 +44,8 @@ def ingresoVehiculo(placa, tipo,horaIngreso):
             return False
 
 #Funcion para salida de vehiculos
-def salidaVehiculo(placa, tipo, horaSalida):
+def salidaVehiculo(placa, tipo):
+    horaSalida =capturaHora()
     for v in parqueadero:
         if v["Placa"].lower()==placa.lower():
             v['Hora Salida']=horaSalida
@@ -51,34 +53,46 @@ def salidaVehiculo(placa, tipo, horaSalida):
             h_Ingreso=datetime.strptime(v['Hora Ingreso'],calculoFormato)
             h_Salida=datetime.strptime(v['Hora Salida'],calculoFormato)
             #Calcular el tiempo en minutos para el cobro
-            tiempoMinutos= (h_Ingreso-h_Salida).total_seconds()/60
+            #print(f'ingreso :{h_Ingreso}' )
+            #print(f'salida :{h_Salida}')
+            tiempoMinutos= (h_Salida-h_Ingreso).total_seconds()/60
+            #print(f'tiempo en minutos:{tiempoMinutos}')
             #calculo del tiempo en horas
             tiempoHora = math.ceil(tiempoMinutos/60)
+            #print(f'tiempo horas:{tiempoHora}')
             match tipo:
                 case 1:
-                    if tiempoHora ==0:
-                        v['Costo'] = costoCarros
-                        reportes.append(v)
-                        parqueadero.remove(v)
-                        return imprimirFactura(placa)
+                    if  v['Tipo'] =='Carro':
+                        if tiempoHora ==0:
+                            v['Costo'] = costoCarros
+                            reportes.append(v)
+                            parqueadero.remove(v)
+                            return imprimirFactura(placa)
+                        else:
+                            costoParqueadero=costoCarros*tiempoHora
+                            v['Costo']=costoParqueadero
+                            reportes.append(v)
+                            parqueadero.remove(v)
+                            return imprimirFactura(placa)
                     else:
-                        costoParqueadero=costoCarros*tiempoHora
-                        v['Costo']=costoParqueadero
-                        reportes.append(v)
-                        parqueadero.remove(v)
-                        return imprimirFactura(placa)
+                        print(f'la placa :{v["Placa"]} no corresponde al tipo de vehiculo')
+                        return False
                 case 2:
-                    if tiempoHora ==0:
-                        v['Costo'] = costoMotos
-                        reportes.append(v)
-                        parqueadero.remove(v)
-                        return imprimirFactura(placa)
+                    if v['Tipo'] == 'Moto':
+                        if tiempoHora ==0:
+                            v['Costo'] = costoMotos
+                            reportes.append(v)
+                            parqueadero.remove(v)
+                            return imprimirFactura(placa)
+                        else:
+                            costoParqueadero=costoMotos*tiempoHora
+                            v['Costo']=costoParqueadero
+                            reportes.append(v)
+                            parqueadero.remove(v)
+                            return imprimirFactura(placa)
                     else:
-                        costoParqueadero=costoMotos*tiempoHora
-                        v['Costo']=costoParqueadero
-                        reportes.append(v)
-                        parqueadero.remove(v)
-                        return imprimirFactura(placa)
+                        print(f'la placa :{v["Placa"]} no corresponde al tipo de vehiculo')
+                        return False
                 case _:
                     mensaje = "Error_"
                     return mensaje
@@ -90,7 +104,19 @@ def salidaVehiculo(placa, tipo, horaSalida):
 def imprimirFactura(placa):
     for v in reportes:
         if v['Placa'].lower()==placa.lower():
-            print(v)
+            print(f'---FACTURA-----')
+            print(f'Placa:{v['Placa']}')
+            print(f'Tipo vehiculo:{v['Tipo']}')
+            print(f'Hora Ingreso:{v['Hora Ingreso']}')
+            print(f'Hora Salida:{v['Hora Salida']}')
+            print(f'Valor:{v['Costo']}')
+            print(f'--------------')
+
+
+def capturaHora():
+    ahora = datetime.now()  ##Captura la hora del sistema automaticamente
+    horaFormato = ahora.strftime('%H:%M:%S')  ##se le da formato a la hora del sistema
+    return horaFormato
 
 ##ciclo para el Programa
 while caso == 0:
@@ -100,8 +126,7 @@ while caso == 0:
     print('******************************************')
     opcion = int(input (f'Menu Principal \n1.Ingresar Vehiculo\n2.Salida Vehiculo\n3.Reportes\n4.Salir\nOpcion: '))
     print('******************************************')
-    ahora = datetime.now()##Captura la hora del sistema automaticamente
-    horaFormato=ahora.strftime('%H:%M:%S')##se le da formato a la hora del sistema
+
     calculoFormato='%H:%M:%S'
     ##Este es la manera de realizar un switch en python
     match opcion:
@@ -117,7 +142,7 @@ while caso == 0:
                             if placaExiste(placa) == True:
                                 print('La placa ya esta ingresada')
                             else:
-                                if ingresoVehiculo(placa,tipo,horaFormato) == True:
+                                if ingresoVehiculo(placa,tipo) == True:
                                     capacidadCarros -= 1
                                 else:
                                     print("Error al ingresar Vehiculo")
@@ -134,7 +159,7 @@ while caso == 0:
                             if placaExiste(placa) == True:
                                 print('La placa ya esta ingresada')
                             else:
-                                if ingresoVehiculo(placa, tipo, horaFormato) == True:
+                                if ingresoVehiculo(placa, tipo) == True:
                                     capacidadMotos -= 1
                                 else:
                                     print("Error al ingresar Vehiculo")
@@ -150,19 +175,18 @@ while caso == 0:
                 case 1:
                     print("----------------------------------------")
                     placa = input('Ingrese la placa del Carro: ')
-                    placaExiste(placa)
                     if placaExiste(placa) == True:
-                        salidaVehiculo(placa,tipo,horaFormato)
-                        capacidadCarros += 1
+                        if salidaVehiculo(placa, tipo) != False:
+                         capacidadCarros += 1
                     else:
                         print('El vehiculo no se encuentra registrado')
                 case 2:
                     print("----------------------------------------")
-                    placa = input('Ingrese la placa del Moto')
-                    placaExiste(placa)
+                    placa = input('Ingrese la placa del Moto : ')
+
                     if placaExiste(placa)==True:
-                        salidaVehiculo(placa,tipo,horaFormato)
-                        capacidadMotos += 1
+                        if salidaVehiculo(placa,tipo)!= False:
+                            capacidadMotos += 1
                     else:
                         print('El vehiculo no se encuentra registrado')
                 case _:
