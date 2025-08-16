@@ -6,8 +6,8 @@ from operator import length_hint
 ## declaracion de variables
 parqueadero = []
 reportes =[]
-capacidadCarros = 3
-capacidadMotos = 2
+capacidadCarros = 50
+capacidadMotos = 20
 vehiculo = {}
 caso = 0
 costoCarros = 2500
@@ -20,7 +20,7 @@ def placaExiste(placa):
         for v in parqueadero:
             if v['Placa'].lower() == placa.lower():
                 return True
-        return print("Error, Placa no existe")
+        return False
 #funcion para ingreso de vehiculos
 def ingresoVehiculo(placa, tipo):
     horaIngreso = capturaHora()
@@ -45,60 +45,30 @@ def ingresoVehiculo(placa, tipo):
 
 #Funcion para salida de vehiculos
 def salidaVehiculo(placa, tipo):
-    horaSalida =capturaHora()
+    horaSalida = capturaHora()
     for v in parqueadero:
-        if v["Placa"].lower()==placa.lower():
-            v['Hora Salida']=horaSalida
-            # cambio el formato de String a numeros para calcular el tiempo
-            h_Ingreso=datetime.strptime(v['Hora Ingreso'],calculoFormato)
-            h_Salida=datetime.strptime(v['Hora Salida'],calculoFormato)
-            #Calcular el tiempo en minutos para el cobro
-            #print(f'ingreso :{h_Ingreso}' )
-            #print(f'salida :{h_Salida}')
-            tiempoMinutos= (h_Salida-h_Ingreso).total_seconds()/60
-            #print(f'tiempo en minutos:{tiempoMinutos}')
-            #calculo del tiempo en horas
-            tiempoHora = math.ceil(tiempoMinutos/60)
-            #print(f'tiempo horas:{tiempoHora}')
-            match tipo:
-                case 1:
-                    if  v['Tipo'] =='Carro':
-                        if tiempoHora ==0:
-                            v['Costo'] = costoCarros
-                            reportes.append(v)
-                            parqueadero.remove(v)
-                            return imprimirFactura(placa)
-                        else:
-                            costoParqueadero=costoCarros*tiempoHora
-                            v['Costo']=costoParqueadero
-                            reportes.append(v)
-                            parqueadero.remove(v)
-                            return imprimirFactura(placa)
-                    else:
-                        print(f'la placa :{v["Placa"]} no corresponde al tipo de vehiculo')
-                        return False
-                case 2:
-                    if v['Tipo'] == 'Moto':
-                        if tiempoHora ==0:
-                            v['Costo'] = costoMotos
-                            reportes.append(v)
-                            parqueadero.remove(v)
-                            return imprimirFactura(placa)
-                        else:
-                            costoParqueadero=costoMotos*tiempoHora
-                            v['Costo']=costoParqueadero
-                            reportes.append(v)
-                            parqueadero.remove(v)
-                            return imprimirFactura(placa)
-                    else:
-                        print(f'la placa :{v["Placa"]} no corresponde al tipo de vehiculo')
-                        return False
-                case _:
-                    mensaje = "Error_"
-                    return mensaje
-        else:
-            mensaje = "placa no existe"
-            return mensaje
+        if v["Placa"].lower() == placa.lower():
+            v['Hora Salida'] = horaSalida
+            h_Ingreso = datetime.strptime(v['Hora Ingreso'], calculoFormato)
+            h_Salida = datetime.strptime(v['Hora Salida'], calculoFormato)
+            tiempoMinutos = (h_Salida - h_Ingreso).total_seconds() / 60
+            tiempoHora = max(1, math.ceil(tiempoMinutos / 60))
+            if tipo == 1 and v['Tipo'] == 'Carro':
+                v['Costo'] = costoCarros * tiempoHora
+            elif tipo == 2 and v['Tipo'] == 'Moto':
+                v['Costo'] = costoMotos * tiempoHora
+            else:
+                print("El tipo de vehículo no coincide")
+                return False
+
+            reportes.append(v)
+            parqueadero.remove(v)
+            imprimirFactura(placa)
+            return True
+
+    print("Placa no existe")
+    return False
+
 
 #funcion imprimir
 def imprimirFactura(placa):
@@ -112,7 +82,7 @@ def imprimirFactura(placa):
             print(f'Valor:{v['Costo']}')
             print(f'--------------')
 
-
+##funcion captura de hora
 def capturaHora():
     ahora = datetime.now()  ##Captura la hora del sistema automaticamente
     horaFormato = ahora.strftime('%H:%M:%S')  ##se le da formato a la hora del sistema
@@ -138,7 +108,6 @@ while caso == 0:
                     if capacidadCarros > 0:
                         placa = input("Ingrese placa: ")
                         if  len(placa)==6:
-                            placaExiste(placa)
                             if placaExiste(placa) == True:
                                 print('La placa ya esta ingresada')
                             else:
@@ -176,7 +145,7 @@ while caso == 0:
                     print("----------------------------------------")
                     placa = input('Ingrese la placa del Carro: ')
                     if placaExiste(placa) == True:
-                        if salidaVehiculo(placa, tipo) != False:
+                        if salidaVehiculo(placa, tipo):
                          capacidadCarros += 1
                     else:
                         print('El vehiculo no se encuentra registrado')
@@ -185,16 +154,28 @@ while caso == 0:
                     placa = input('Ingrese la placa del Moto : ')
 
                     if placaExiste(placa)==True:
-                        if salidaVehiculo(placa,tipo)!= False:
+                        if salidaVehiculo(placa,tipo):
                             capacidadMotos += 1
                     else:
                         print('El vehiculo no se encuentra registrado')
                 case _:
                     print('Opcion no valida')
-        case 3:
-            print("-------------------------------------")
-            tipoReporte=input(f'Submenu Reportes\n1.Reporte General\n2.Ocupacion Actual\n3.Reporte vehiculos retirados\nOpcion: ')
 
+        case 3:
+            tipoReporte=int(input(f'Submenu Reportes\n1.Reporte General\n2.Ocupacion Actual\nOpcion: '))
+
+            match tipoReporte:
+                case 1:
+                    total=0
+                    for v in reportes:
+                        total+=v['Costo']
+                        print(v)
+                    print(f'Total recaudado a la fecha: {total}')
+                case 2:
+                    for v in parqueadero:
+                        print(v)
+                case _:
+                    print("Error en la opcion")
         case 4:
             print("Hasta la vista Baby....")
             caso=1
