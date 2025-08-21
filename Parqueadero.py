@@ -94,91 +94,117 @@ while caso == 0:
     print("******************************************")
     print(f'Bienvenidos Al Parqueadero el Rayadero\nCapacidad de motos: {capacidadMotos}\nCapacidad Carros: {capacidadCarros}')
     print('******************************************')
-    opcion = int(input (f'Menu Principal \n1.Ingresar Vehiculo\n2.Salida Vehiculo\n3.Reportes\n4.Salir\nOpcion: '))
+    opcion =(input (f'Menu Principal \n1.Ingresar Vehiculo\n2.Salida Vehiculo\n3.Reportes\n4.Salir\nOpcion: '))
     print('******************************************')
+    calculoFormato = '%H:%M:%S'
 
-    calculoFormato='%H:%M:%S'
-    ##Este es la manera de realizar un switch en python
-    match opcion:
-        case 1:
-            tipo = int(input(f'SubMenu \n1.Ingreso Carro\n2.Ingreso Moto\nOpcion: '))
-            match tipo:##switch anidado
+    if opcion.isdigit():
+        entrada = int(opcion)
+        try:
+            ##Este es la manera de realizar un switch en python
+            match entrada:
                 case 1:
-                    print("---------------------------------------")
-                    if capacidadCarros > 0:
-                        placa = input("Ingrese placa: ")
-                        if  len(placa)==6:
-                            if placaExiste(placa) == True:
-                                print('La placa ya esta ingresada')
-                            else:
-                                if ingresoVehiculo(placa,tipo) == True:
-                                    capacidadCarros -= 1
-                                else:
-                                    print("Error al ingresar Vehiculo")
-                        else:
-                            print("Error al ingresar la Placa")
+                    submenu1=(input(f'SubMenu \n1.Ingreso Carro\n2.Ingreso Moto\nOpcion: '))
+                    if submenu1.isdigit():
+                        tipo=int(submenu1)
+                        try:
+                            match tipo:##switch anidado
+                                case 1:
+                                    print("---------------------------------------")
+                                    if capacidadCarros > 0:
+                                        placa = input("Ingrese placa: ")
+                                        if  len(placa)==6:
+                                            if placaExiste(placa) == True:
+                                                print('La placa ya esta ingresada')
+                                            else:
+                                                if ingresoVehiculo(placa,tipo) == True:
+                                                    capacidadCarros -= 1
+                                                else:
+                                                    print("Error al ingresar Vehiculo")
+                                        else:
+                                            print("Error al ingresar la Placa")
+                                    else:
+                                        print('El parqueadero esta lleno, vuelva mas tarde')
+                                case 2:
+                                    print("----------------------------------")
+                                    if capacidadMotos > 0:
+                                        placa = input("Ingrese placa: ")
+                                        if len(placa) == 6 or len(placa)==5:
+                                            placaExiste(placa)
+                                            if placaExiste(placa) == True:
+                                                print('La placa ya esta ingresada')
+                                            else:
+                                                if ingresoVehiculo(placa, tipo) == True:
+                                                    capacidadMotos -= 1
+                                                else:
+                                                    print("Error al ingresar Vehiculo")
+                                        else:
+                                            print("Error al ingresar la Placa")
+                                    else:
+                                        print('El parqueadero esta lleno, vuelva mas tarde')
+                                case _:
+                                    print('Opcion no valida')
+                        except valueError:
+                            print("Valor digitado no valido")
                     else:
-                        print('El parqueadero esta lleno, vuelva mas tarde')
+                        print("Lo digitado no es un numero")
                 case 2:
-                    print("----------------------------------")
-                    if capacidadMotos > 0:
-                        placa = input("Ingrese placa: ")
-                        if len(placa) == 6 or len(placa)==5:
-                            placaExiste(placa)
-                            if placaExiste(placa) == True:
-                                print('La placa ya esta ingresada')
-                            else:
-                                if ingresoVehiculo(placa, tipo) == True:
-                                    capacidadMotos -= 1
-                                else:
-                                    print("Error al ingresar Vehiculo")
-                        else:
-                            print("Error al ingresar la Placa")
+                    submenu2 = (input(f'SubMenu \n1.Salida Carro\n2.Salida Moto\nOpcion :'))
+                    if submenu2.isdigit():
+                        tipo=int(submenu2)
+                        try:
+                            match tipo:
+                                case 1:
+                                    print("----------------------------------------")
+                                    placa = input('Ingrese la placa del Carro: ')
+                                    if placaExiste(placa) == True:
+                                        if salidaVehiculo(placa, tipo):
+                                         capacidadCarros += 1
+                                    else:
+                                        print('El vehiculo no se encuentra registrado')
+                                case 2:
+                                    print("----------------------------------------")
+                                    placa = input('Ingrese la placa del Moto : ')
+
+                                    if placaExiste(placa)==True:
+                                        if salidaVehiculo(placa,tipo):
+                                            capacidadMotos += 1
+                                    else:
+                                        print('El vehiculo no se encuentra registrado')
+                                case _:
+                                    print('Opcion no valida')
+                        except valueError:
+                            print("valor digitado no valido")
                     else:
-                        print('El parqueadero esta lleno, vuelva mas tarde')
-                case _:
-                    print('Opcion no valida')
-        case 2:
-            tipo = int(input(f'SubMenu \n1.Salida Carro\n2.Salida Moto\nOpcion :'))
-            match tipo:
-                case 1:
-                    print("----------------------------------------")
-                    placa = input('Ingrese la placa del Carro: ')
-                    if placaExiste(placa) == True:
-                        if salidaVehiculo(placa, tipo):
-                         capacidadCarros += 1
+                        print("Lo digitado no es un numero")
+                case 3:
+                    submenu3=(input(f'Submenu Reportes\n1.Reporte General\n2.Ocupacion Actual\nOpcion: '))
+                    if submenu3.isdigit():
+                        tipoReporte = int(submenu3)
+                        try:
+                            match tipoReporte:
+                                case 1:
+                                    total=0
+                                    for v in reportes:
+                                        total+=v['Costo']
+                                        print(v)
+                                    print(f'Total recaudado a la fecha: {total}')
+                                case 2:
+                                    for v in parqueadero:
+                                        print(v)
+                                case _:
+                                    print("Error en la opcion")
+                        except valueError:
+                            print("numero digitado no valido")
                     else:
-                        print('El vehiculo no se encuentra registrado')
-                case 2:
-                    print("----------------------------------------")
-                    placa = input('Ingrese la placa del Moto : ')
+                        print("Lo digitado no es un numero")
+                case 4:
+                    print("Hasta la vista Baby....")
+                    caso=1
 
-                    if placaExiste(placa)==True:
-                        if salidaVehiculo(placa,tipo):
-                            capacidadMotos += 1
-                    else:
-                        print('El vehiculo no se encuentra registrado')
                 case _:
-                    print('Opcion no valida')
-
-        case 3:
-            tipoReporte=int(input(f'Submenu Reportes\n1.Reporte General\n2.Ocupacion Actual\nOpcion: '))
-
-            match tipoReporte:
-                case 1:
-                    total=0
-                    for v in reportes:
-                        total+=v['Costo']
-                        print(v)
-                    print(f'Total recaudado a la fecha: {total}')
-                case 2:
-                    for v in parqueadero:
-                        print(v)
-                case _:
-                    print("Error en la opcion")
-        case 4:
-            print("Hasta la vista Baby....")
-            caso=1
-
-        case _:
-            print("Error opcion no valida")
+                    print("Error opcion no valida")
+        except valueError:
+            print("Lo digitado no es un numero")
+    else:
+        print("Lo digitado no es un numero")
