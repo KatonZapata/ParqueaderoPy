@@ -8,7 +8,7 @@ parqueadero = []
 reportes =[]
 capacidadCarros = 50
 capacidadMotos = 20
-vehiculo = {}
+##vehiculo = {}##posible no utilizacion del diccionario
 caso = 0
 costoCarros = 2500
 costoMotos = 1500
@@ -24,8 +24,8 @@ def placaExiste(placa):
 #funcion para ingreso de vehiculos
 def ingresoVehiculo(placa, tipo):
     horaIngreso = capturaHora()
-    nuevoVehiculo = {}
-    match tipo:
+    nuevoVehiculo = {}#evita que se re escriban los datos existentes - crea un nuevo vehiculo.
+    match tipo:##tambien conocido como switch
         case 1:
             nuevoVehiculo['Placa']=(placa)
             nuevoVehiculo['Tipo']=("Carro")
@@ -49,10 +49,10 @@ def salidaVehiculo(placa, tipo):
     for v in parqueadero:
         if v["Placa"].lower() == placa.lower():
             v['Hora Salida'] = horaSalida
-            h_Ingreso = datetime.strptime(v['Hora Ingreso'], calculoFormato)
+            h_Ingreso = datetime.strptime(v['Hora Ingreso'], calculoFormato) # datetime.strptime realiza un formateo de la hora para poder realizar calculos
             h_Salida = datetime.strptime(v['Hora Salida'], calculoFormato)
             tiempoMinutos = (h_Salida - h_Ingreso).total_seconds() / 60
-            tiempoHora = max(1, math.ceil(tiempoMinutos / 60))
+            tiempoHora = max(1, math.ceil(tiempoMinutos / 60))#math.ceil redondea la cifra al numero siguente ejemplo 1.5->2
             if tipo == 1 and v['Tipo'] == 'Carro':
                 v['Costo'] = costoCarros * tiempoHora
             elif tipo == 2 and v['Tipo'] == 'Moto':
@@ -98,7 +98,7 @@ while caso == 0:
     print('******************************************')
     calculoFormato = '%H:%M:%S'
 
-    if opcion.isdigit():
+    if opcion.isdigit():#validacion para saber si es numero.
         entrada = int(opcion)
         try:
             ##Este es la manera de realizar un switch en python
@@ -145,7 +145,7 @@ while caso == 0:
                                 case _:
                                     print('Opcion no valida')
                         except valueError:
-                            print("Valor digitado no valido")
+                            print("Error 400")
                     else:
                         print("Lo digitado no es un numero")
                 case 2:
@@ -174,7 +174,7 @@ while caso == 0:
                                 case _:
                                     print('Opcion no valida')
                         except valueError:
-                            print("valor digitado no valido")
+                            print("Error 404")
                     else:
                         print("Lo digitado no es un numero")
                 case 3:
@@ -195,16 +195,15 @@ while caso == 0:
                                 case _:
                                     print("Error en la opcion")
                         except valueError:
-                            print("numero digitado no valido")
+                            print("Error 404")
                     else:
                         print("Lo digitado no es un numero")
                 case 4:
                     print("Hasta la vista Baby....")
                     caso=1
-
                 case _:
                     print("Error opcion no valida")
-        except valueError:
-            print("Lo digitado no es un numero")
-    else:
+        except valueError: ## este es el except que cierra el try inicial
+            print("error 404")
+    else:# cierre del if inicial
         print("Lo digitado no es un numero")
